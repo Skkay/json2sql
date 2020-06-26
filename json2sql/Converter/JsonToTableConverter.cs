@@ -111,9 +111,9 @@ namespace json2sql.converter
         /// </summary>
         /// <param name="sqlPersister">SQL stratagy</param>
         /// <returns></returns>
-        public StringBuilder ToSqlScript(ISqlPersister sqlPersister)
+        public StringBuilder ToSqlScript(ISqlPersister sqlPersister, string file)
         {
-            return sqlPersister.ToSqlScript(rootTable);
+            return sqlPersister.ToSqlScript(rootTable, file);
         }
 
         /// <summary>

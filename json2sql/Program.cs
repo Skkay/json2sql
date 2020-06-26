@@ -13,7 +13,9 @@ namespace json2sql
         static void Main(string[] args)
         {
             var folderPath = @"F:\Github\json2sql\json2sql\SampleJSON\";
-            var fileName =  @"sales.json";
+            string file = "sales";
+            var fileName = file + ".json";
+            
             //var fileName = @"ArrayContainsObject.json";
             //var fileName = @"ArrayWithHighlyNestedObjects.json";
             //var fileName = @"manu.json";
@@ -26,12 +28,12 @@ namespace json2sql
 
             Console.WriteLine("Conersion started");
 
-            Converter("FileUpload", folderPath + fileName, Convertertype.mssql);
+            Converter("FileUpload", folderPath + fileName, Convertertype.mysql, file);
 
             Console.ReadLine();
         }
 
-        public static void Converter(string datasource, string pathortextorurl, Convertertype convertertype)
+        public static void Converter(string datasource, string pathortextorurl, Convertertype convertertype, string file)
         {
             StringBuilder script = new StringBuilder();
             IDictionary<string, JToken> root = new Dictionary<string, JToken>();
@@ -61,16 +63,16 @@ namespace json2sql
                 switch (convertertype)
                 {
                     case Convertertype.mssql:
-                        script = converter.ToSqlScript(new MsSqlPersister());
+                        script = converter.ToSqlScript(new MsSqlPersister(), file);
                         break;
                     case Convertertype.oracle:
-                        script = converter.ToSqlScript(new OraclePersister());
+                        script = converter.ToSqlScript(new OraclePersister(), file);
                         break;
                     case Convertertype.mysql:
-                        script = converter.ToSqlScript(new MySqlPersister());
+                        script = converter.ToSqlScript(new MySqlPersister(), file);
                         break;
                     case Convertertype.sqlite:
-                        script = converter.ToSqlScript(new SqlitePersister());
+                        script = converter.ToSqlScript(new SqlitePersister(), file);
                         break;
                     default:
                         break;

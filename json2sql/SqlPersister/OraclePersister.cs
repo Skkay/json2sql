@@ -12,12 +12,12 @@ namespace json2sql.sqlpersister
         {
             throw new NotImplementedException();
         }
-        public override StringBuilder ToSqlScript(JsonDataTable jsonDataTable)
+        public override StringBuilder ToSqlScript(JsonDataTable jsonDataTable, string file)
         {
             this.jsonDataTable = jsonDataTable;
             StringBuilder stringBuilder = new StringBuilder();
-            GenerateCreateTableScript(jsonDataTable, stringBuilder);
-            GenerateInsertScript(jsonDataTable, stringBuilder);
+            GenerateCreateTableScript(jsonDataTable, stringBuilder, file);
+            GenerateInsertScript(jsonDataTable, stringBuilder, file);
             return stringBuilder;
         }
         public override string ToSqlScript(JsonDataTable jsonDataTable, FilePath filePath)
@@ -25,9 +25,9 @@ namespace json2sql.sqlpersister
             throw new NotImplementedException();
         }
 
-        private void GenerateCreateTableScript(JsonDataTable dt, StringBuilder sbScript)
+        private void GenerateCreateTableScript(JsonDataTable dt, StringBuilder sbScript, string file)
         {
-            sbScript.AppendFormat("CREATE TABLE {0}(", dt.TableName.Trim().Replace(' ', '_'));
+            sbScript.AppendFormat("CREATE TABLE {0}__{1}(", file, dt.TableName.Trim().Replace(' ', '_'));
             sbScript.AppendLine();
             foreach (var fieldData in dt.FieldMetaData)
             {
@@ -44,19 +44,19 @@ namespace json2sql.sqlpersister
                     sbScript.AppendLine();
                     sbScript.AppendFormat("------------ Table : \"{0}\" ------------", table.Key);
                     sbScript.AppendLine();
-                    GenerateCreateTableScript(table.Value, sbScript);
+                    GenerateCreateTableScript(table.Value, sbScript, file);
                 }
             }
             sbScript.AppendLine();
         }
-        private void GenerateInsertScript(JsonDataTable dt, StringBuilder sbScript)
+        private void GenerateInsertScript(JsonDataTable dt, StringBuilder sbScript, string file)
         {
-            sbScript.AppendFormat("------------ Begin Table \"{0}\" Rows ({1}) ------------", dt.TableName, dt.Rows.Count);
+            sbScript.AppendFormat("------------ Begin Table \"{0}__{1}\" Rows ({2}) ------------", file, dt.TableName, dt.Rows.Count);
             sbScript.AppendLine();
 
             foreach (var row in dt.Rows.DataRows)
             {
-                sbScript.AppendFormat("INSERT INTO {0}(", dt.TableName.Trim().Replace(' ', '_'));
+                sbScript.AppendFormat("INSERT INTO {0}__{1}(", file, dt.TableName.Trim().Replace(' ', '_'));
                 foreach (var fieldData in dt.FieldMetaData)
                 {
                     sbScript.AppendFormat("{0},", DecideFieldName(fieldData));
@@ -92,14 +92,14 @@ namespace json2sql.sqlpersister
                 sbScript.Length -= 1;   //remove last comma
                 sbScript.Append(")").AppendLine();
             }
-            sbScript.AppendFormat("------------ End Table \"{0}\" Rows ({1}) ------------", dt.TableName, dt.Rows.Count);
+            sbScript.AppendFormat("------------ End Table \"{0}__{1}\" Rows ({2}) ------------", file, dt.TableName, dt.Rows.Count);
             sbScript.AppendLine().AppendLine();
 
             if (dt.Tables.Count > 0)    //Iterate into child tables
             {
                 foreach (var table in dt.Tables)
                 {
-                    GenerateInsertScript(table.Value, sbScript);
+                    GenerateInsertScript(table.Value, sbScript, file);
                 }
             }
         }
